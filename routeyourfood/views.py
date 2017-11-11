@@ -16,3 +16,12 @@ def front(request):
 
 def details(request):
 	return render(request, 'routeyourfood/details.html')
+
+def process(request):
+	if request.is_ajax():
+		# print request.POST
+		# print 
+		# print
+		# print
+		print request.POST.getlist('coords[]')
+		return HttpResponse()

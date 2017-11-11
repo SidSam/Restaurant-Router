@@ -1,5 +1,35 @@
 function initMap() {
 
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
     var boxes = null;
     var boxpolys = null;
     var polyline_coordinates = [];
@@ -423,6 +453,18 @@ function initMap() {
                 console.log(polyline_coordinates.length);
                 console.log(spaced_coordinates);
 
+                $.ajax({
+                    url: 'process/',
+                    type: 'POST',
+                    data: {'coords[]': polyline_coordinates},
+                    success: function(data, textStatus, jqXHR) {
+                        console.log(textStatus);
+                    },
+                    failure: function(textStatus, jqXHR, errorThrown) {
+                        console.log(textStatus);
+                    }
+                });
+
 
 
                 
@@ -436,7 +478,7 @@ function initMap() {
                 // boxes = rboxer.box(path, distance);
                 // drawBoxes(boxes);
                 // console.log("now finding restaurants");
-                findRestaurants(0);
+                // findRestaurants(0);
                 // masterFunction().done(function() {console.log('all done');});
                 // drawCircles();
                 
