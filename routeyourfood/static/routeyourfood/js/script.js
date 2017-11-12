@@ -456,7 +456,7 @@ function initMap() {
                 $.ajax({
                     url: 'process/',
                     type: 'POST',
-                    data: {'coords[]': polyline_coordinates},
+                    data: {'coords[]': polyline_coordinates, 'distance': distance*1000},
                     success: function(data, textStatus, jqXHR) {
                         console.log(textStatus);
                     },
