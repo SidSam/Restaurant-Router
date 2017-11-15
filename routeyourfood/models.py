@@ -15,3 +15,8 @@ class Restaurant(models.Model):
 	website = models.URLField(null=True)
 	maps_url = models.URLField(null=True)
 	photos = ArrayField(models.URLField())
+	lat = models.DecimalField(max_digits=9, decimal_places=6)
+	lng = models.DecimalField(max_digits=9, decimal_places=6)
+
+	def __str__(self):
+		return "%s --- %s" % (self.place_id, self.name)

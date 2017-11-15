@@ -234,6 +234,54 @@ function initMap() {
 
     }
 
+    function addNewMarker(place) {
+        // for (var i=0;i<data.length;i++) {
+
+            var marker = new google.maps.Marker({
+                map: map_directions,
+                position: {'lat': parseFloat(place.lat), 'lng': parseFloat(place.lng)},
+                icon: {
+                    url: 'https://developers.google.com/maps/documentation/javascript/images/circle.png',
+                    anchor: new google.maps.Point(10, 10),
+                    scaledSize: new google.maps.Size(10, 17)
+                }
+            });
+            // google.maps.event.addListener(marker, 'click', function() {
+            //     $.ajax({
+            //         url: 'get_details/',
+            //         type: 'POST',
+            //         data: {'place_id': data.place_id},
+            //         success: function(data, textStatus, jqXHR) {
+            //             // infowindowContent_directions.children['place-icon'].src = place.icon;
+            //             // data = JSON.parse(data);
+            //             console.log(data);
+            //             console.log(data.name);
+            //             console.log(data.address);
+            //             infowindowContent_directions.children['place-name'].textContent = data.name;
+            //             infowindowContent_directions.children['place-address'].textContent = data.address;
+            //             infoWindow_directions.open(map_directions, marker);
+            //         }
+            //     });
+            // });
+            google.maps.event.addListener(marker, 'click', function() {
+                service.getDetails({'placeId': place.place_id}, function(result, status) {
+                    if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                        console.error(status);
+                        return;
+                    }
+                    console.log(result);
+                    infowindowContent_directions.children['place-icon'].src = result.icon;
+                    infowindowContent_directions.children['place-name'].textContent = result.name;
+                    infowindowContent_directions.children['place-address'].textContent = result.formatted_address;
+                    infoWindow_directions.open(map_directions, marker);
+                });
+            });
+
+        // }
+        
+    }
+
+
     function drawCircles() {
         for (var i=0; i<spaced_coordinates.length; i++) {
             var curr_coords = new google.maps.LatLng(spaced_coordinates[i][0],spaced_coordinates[i][1]);  
@@ -404,7 +452,9 @@ function initMap() {
         return R * c;
     }
 
+
     button.addEventListener("click", function() {
+        polyline_coordinates = [];
         // clearBoxes();
         distance = document.getElementById('distance').value/1000;
         $spinner.show();
@@ -453,17 +503,31 @@ function initMap() {
                 console.log(polyline_coordinates.length);
                 console.log(spaced_coordinates);
 
-                $.ajax({
-                    url: 'process/',
-                    type: 'POST',
-                    data: {'coords[]': polyline_coordinates, 'distance': distance*1000},
-                    success: function(data, textStatus, jqXHR) {
-                        console.log(textStatus);
-                    },
-                    failure: function(textStatus, jqXHR, errorThrown) {
-                        console.log(textStatus);
-                    }
-                });
+                for (var i=0; i<1; i++) {
+
+                    $.ajax({
+                        url: 'process/',
+                        type: 'POST',
+                        data: {'coords': polyline_coordinates[i], 'distance': distance*1000},
+                        success: function(data, textStatus, jqXHR) {
+                            console.log(textStatus);
+                            console.log(data);
+                            // console.log(JSON.parse(data));
+                            data = JSON.parse(data);
+                            for (var i=0;i<data.length;i++) {
+                                addNewMarker(data[i]);
+                            }
+                            // addNewMarker(JSON.parse(data));
+
+                        },
+                        error: function(textStatus, jqXHR, errorThrown) {
+                            console.log(textStatus);
+                        }
+                    });
+
+                }
+
+                
 
 
 
