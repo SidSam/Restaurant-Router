@@ -1,6 +1,5 @@
 function initMap() {
 
-
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -456,6 +455,7 @@ function initMap() {
         data = JSON.parse(data);
         for (var i=0;i<data.length;i++) {
             console.log(data[i]);
+            restaurants.push(data[i].place_id);
             addNewMarker(data[i]);
         }
     }
@@ -588,6 +588,11 @@ function initMap() {
 
     $(document).ajaxStop(function() {
         console.log("all done now");
+        $spinner.hide();
+        var detailsAnchorTag = document.getElementById('details');
+        detailsAnchorTag.href = "details/";
+        detailsAnchorTag.classList.remove('disabled');
+        sessionStorage.setItem('restos', JSON.stringify(restaurants));
         // window.sessionStorage.setItem("zomato", JSON.stringify(zomato_restaurants)); // Saving
         // window.location.replace('zomatorestaurants.html');
         // $zr.text(zomato_restaurants);

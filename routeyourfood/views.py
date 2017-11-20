@@ -8,6 +8,10 @@ from googleplaces import GooglePlaces, types, lang
 from models import Restaurant
 from django.core.exceptions import ObjectDoesNotExist
 import simplejson as json
+from decimal import *
+from django.core import serializers
+import traceback, sys
+from django.forms.models import model_to_dict
 
 # Create your views here.
 
@@ -23,15 +27,23 @@ def front(request):
 def details(request):
 	return render(request, 'routeyourfood/details.html')
 
-# def get_details(request):
-# 	if request.is_ajax():
-# 		place_id = request.POST['place_id']
-# 		obj = Restaurant.objects.get(place_id=place_id)
-# 		print obj.name
-# 		print obj.address
-# 		json_context = {'name': obj.name, 'address': obj.address}
-# 		print json_context
-# 		return HttpResponse(json_context)
+def get_details(request):
+	if request.is_ajax():
+		place_id = request.POST['place_id']
+		all_restos = Restaurant.objects.all()
+		print all_restos
+		try:
+			obj = Restaurant.objects.get(place_id=place_id)
+			print obj
+			# json_context = serializers.serialize('json', obj)
+			json_context = model_to_dict(obj)
+		except Exception as e:
+			traceback.print_tb(sys.exc_info()[2])
+			print e
+			print "no details for ", place_id
+			json_context = {}
+		
+		return HttpResponse(json.dumps(json_context))
 
 def check_authentic(place):
 	return (place.formatted_address and place.local_phone_number and place.photos)
@@ -63,7 +75,7 @@ def process(request):
 			if check_exists(place):
 				print "already existing in db, so continuing"
 				obj = Restaurant.objects.get(place_id=place.place_id)
-				curr_restaurants.append({'place_id': obj.place_id, 'name': obj.name, 'lat': json.dumps(obj.lat, use_decimal=True), 'lng': json.dumps(obj.lng, use_decimal=True)})
+				curr_restaurants.append({'place_id': obj.place_id, 'name': obj.name, 'lat': Decimal(json.dumps(obj.lat, use_decimal=True)), 'lng': Decimal(json.dumps(obj.lng, use_decimal=True))})
 				continue
 			
 			place.get_details()
@@ -71,7 +83,7 @@ def process(request):
 			if check_authentic(place):
 			# 	print "place was also authentic"
 			# 	print place.formatted_address
-				curr_restaurants.append({'place_id': place.place_id, 'name': place.name, 'lat': float(place.geo_location['lat']), 'lng': float(place.geo_location['lng'])})
+				curr_restaurants.append({'place_id': place.place_id, 'name': place.name, 'lat': Decimal(place.geo_location['lat']), 'lng': Decimal(place.geo_location['lng'])})
 				
 			# 	# get only 3 photos
 				photo_urls = []
