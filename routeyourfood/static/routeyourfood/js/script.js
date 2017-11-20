@@ -236,7 +236,6 @@ function initMap() {
 
     function addNewMarker(place) {
         // for (var i=0;i<data.length;i++) {
-
             var marker = new google.maps.Marker({
                 map: map_directions,
                 position: {'lat': parseFloat(place.lat), 'lng': parseFloat(place.lng)},
@@ -269,7 +268,6 @@ function initMap() {
                         console.error(status);
                         return;
                     }
-                    console.log(result);
                     infowindowContent_directions.children['place-icon'].src = result.icon;
                     infowindowContent_directions.children['place-name'].textContent = result.name;
                     infowindowContent_directions.children['place-address'].textContent = result.formatted_address;
@@ -424,7 +422,7 @@ function initMap() {
                     else {
                         console.log("all done");
                         // $spinner.hide();
-                        getRestaurantDetails(0)
+                        getRestaurantDetails(0);
                     }
                 }
                 else {
@@ -452,6 +450,15 @@ function initMap() {
         return R * c;
     }
 
+    function successFunction(data, textStatus, jqXHR) {
+        console.log('inside success function');
+        console.log(data);
+        data = JSON.parse(data);
+        for (var i=0;i<data.length;i++) {
+            console.log(data[i]);
+            addNewMarker(data[i]);
+        }
+    }
 
     button.addEventListener("click", function() {
         polyline_coordinates = [];
@@ -480,8 +487,8 @@ function initMap() {
                 // console.log(response.routes);
                 for (i=0; i<response.routes[0].overview_path.length; i++) {
                     if (!i) {
-                        control_coordinates = [response.routes[0].overview_path[i].lat(), response.routes[0].overview_path[i].lng()]
-                        spaced_coordinates.push([response.routes[0].overview_path[i].lat(), response.routes[0].overview_path[i].lng()])
+                        control_coordinates = [response.routes[0].overview_path[i].lat(), response.routes[0].overview_path[i].lng()];
+                        spaced_coordinates.push([response.routes[0].overview_path[i].lat(), response.routes[0].overview_path[i].lng()]);
                         console.log("initial control coordinates " + control_coordinates[0] + ', ' + control_coordinates[1]);
                     }
                     else {
@@ -504,25 +511,19 @@ function initMap() {
                 console.log(spaced_coordinates);
 
                 for (var i=0; i<1; i++) {
+                    console.log(i);
 
                     $.ajax({
                         url: 'process/',
                         type: 'POST',
                         data: {'coords': polyline_coordinates[i], 'distance': distance*1000},
-                        success: function(data, textStatus, jqXHR) {
-                            console.log(textStatus);
-                            console.log(data);
-                            // console.log(JSON.parse(data));
-                            data = JSON.parse(data);
-                            for (var i=0;i<data.length;i++) {
-                                addNewMarker(data[i]);
-                            }
-                            // addNewMarker(JSON.parse(data));
-
-                        },
-                        error: function(textStatus, jqXHR, errorThrown) {
-                            console.log(textStatus);
-                        }
+                        // success: function(data, textStatus, jqXHR) {
+                        //     console.log(data);
+                        // }
+                        success: successFunction
+                        // error: function(textStatus, jqXHR, errorThrown) {
+                        //     console.log(textStatus);
+                        // }
                     });
 
                 }
