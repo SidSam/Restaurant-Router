@@ -168,8 +168,6 @@ function script() {
 				currRow.className += ' carousel slide';
 				currRow.setAttribute('data-interval', false);
 
-				// <div class="carousel-inner" role="listbox">
-
 				var innerRow = document.createElement('div');
 				innerRow.className += 'carousel-inner';
 				innerRow.setAttribute('role', 'listbox');
@@ -217,22 +215,6 @@ function script() {
 				nextAnchor.appendChild(nextIconSpan);
 				nextAnchor.appendChild(nextTextSpan);
 				currRow.appendChild(nextAnchor);
-
-
-				// var imageDiv = document.createElement('div');
-				// imageDiv.className = 'col-md-10';
-				// imageDiv.style.cssText = 'height: 150px';				
-				// for (var j=0; j<attribute.length; j++) {
-				// 	var imageTag = document.createElement("img");
-				// 	imageTag.src = attribute[j];
-				// 	imageTag.className = 'slideshow-'+index;
-				// 	imageTag.style.cssText = 'max-width: 100%; max-height: 100%';
-				// 	if (j)
-				// 		imageTag.style.display = 'none';
-				// 	imageDiv.appendChild(imageTag);
-				// }
-				// currRow.appendChild(imageDiv);
-
 				
 			}
 			
@@ -311,9 +293,11 @@ function script() {
 		console.log(errorThrown);
 	}
 
-	function newPopulatePage() {
+	function newPopulatePage(pageNo) {
+		var start = (pageNo-1) * 4;
+		var stop = au.length<4 ? au.length : pageNo*4 - 1;
 
-		for (var i=0; i<1; i++) {
+		for (var i=start; i<stop; i++) {
 			$.ajax({
 				url: 'get_details/',
 				data: {'place_id': au[i]},
@@ -325,9 +309,9 @@ function script() {
 
 	}
 
-	console.log('Loaded');
-	// populatePage();
-	newPopulatePage();
+	var pageNo = +document.getElementById('page-no').innerHTML;
+	
+	// newPopulatePage(pageNo);
 
     document.getElementById('rating-asc').addEventListener("click", function() {
     	au.sort(sortByField('rating'));

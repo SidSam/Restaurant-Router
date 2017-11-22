@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 from django.views import View
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from googleplaces import GooglePlaces, types, lang
 from models import Restaurant
 from django.core.exceptions import ObjectDoesNotExist
@@ -24,27 +24,31 @@ class FrontView(View):
 def front(request):
 	return render(request, 'routeyourfood/front.html')
 
-def details(request):
-	return render(request, 'routeyourfood/details.html')
+def details(request, page):
+	pids = request.session['place_ids']
+	page = int(page)
+
+	total_pages = len(pids)/4 + 1
+	start = (page-1)*4
+	stop = page*4-1 if len(pids) > 3 else len(pids)
+
+	curr_pids = pids[start:stop+1]
+
+	objs = Restaurant.objects.filter(place_id__in=curr_pids)
+
+	return render(request, 'routeyourfood/details.html', {'objs': objs})
 
 def get_details(request):
 	if request.is_ajax():
 		place_id = request.POST['place_id']
 		all_restos = Restaurant.objects.all()
-		print all_restos
 		try:
 			obj = Restaurant.objects.get(place_id=place_id)
-			print obj
-			# json_context = serializers.serialize('json', obj)
 			json_context = model_to_dict(obj)
+			return HttpResponse(json.dumps(json_context))
 		except Exception as e:
-			traceback.print_tb(sys.exc_info()[2])
-			print e
-			print "no details for ", place_id
-			json_context = {}
+			return HttpResponseBadRequest()
 		
-		return HttpResponse(json.dumps(json_context))
-
 def check_authentic(place):
 	return (place.formatted_address and place.local_phone_number and place.photos)
 
@@ -60,6 +64,7 @@ def process(request):
 		coord = request.POST.getlist('coords[]')
 		distance = request.POST['distance']
 		google_places = GooglePlaces(KEY)
+		request.session['place_ids'] = []
 		
 		# for coord in coords:
 		print "coord is ", coord
@@ -76,6 +81,9 @@ def process(request):
 				print "already existing in db, so continuing"
 				obj = Restaurant.objects.get(place_id=place.place_id)
 				curr_restaurants.append({'place_id': obj.place_id, 'name': obj.name, 'lat': Decimal(json.dumps(obj.lat, use_decimal=True)), 'lng': Decimal(json.dumps(obj.lng, use_decimal=True))})
+				temp = request.session['place_ids']
+				temp.append(obj.place_id)
+				request.session['place_ids'] = temp
 				continue
 			
 			place.get_details()
@@ -84,7 +92,10 @@ def process(request):
 			# 	print "place was also authentic"
 			# 	print place.formatted_address
 				curr_restaurants.append({'place_id': place.place_id, 'name': place.name, 'lat': Decimal(place.geo_location['lat']), 'lng': Decimal(place.geo_location['lng'])})
-				
+				temp = request.session['place_ids']
+				temp.append(place.place_id)
+				request.session['place_ids'] = temp
+
 			# 	# get only 3 photos
 				photo_urls = []
 				for idx, photo in enumerate(place.photos):

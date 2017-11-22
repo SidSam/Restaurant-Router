@@ -590,7 +590,7 @@ function initMap() {
         console.log("all done now");
         $spinner.hide();
         var detailsAnchorTag = document.getElementById('details');
-        detailsAnchorTag.href = "details/";
+        detailsAnchorTag.href = "details/1";
         detailsAnchorTag.classList.remove('disabled');
         sessionStorage.setItem('restos', JSON.stringify(restaurants));
         // window.sessionStorage.setItem("zomato", JSON.stringify(zomato_restaurants)); // Saving
