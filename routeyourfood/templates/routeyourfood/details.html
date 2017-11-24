@@ -36,18 +36,18 @@
         </script>
     </head>
     <body onload="script()">
+
         <span id='curr-page' hidden>{{ curr_page }}</span>
-        <div class="container">
+
+        <div class="container dropdown">
             <div class="row">
-                <select>
-                <option selected="selected">Sort:</option>
-                <option id='rating-asc'>Rating - Low to High</option>
-                <option id='rating-desc'>Rating - High to Low</option>
-                <option id='name-asc'>Name - Ascending</option>
-                <option id='name-desc'>Name - Descending</option>
-                <option id='price-asc'>Price - Low to High</option>
-                <option id='price-desc'>Price - High to Low</option>
-            </select>
+                <button class="btn btn-secondary btn-sm dropdown-toggle dropdown-toggle-split" type='button' id='dropdownMenuButton' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Sort:</button>
+                <div class="dropdown-menu" aria-labelledby='dropdownMenuButton'>
+                    <a href="{% url 'detailspage' page=1 order='rating-asc' %}" class="dropdown-item">Rating - Low to High</a>
+                    <a href="{% url 'detailspage' page=1 order='rating-desc' %}" class="dropdown-item">Rating - High to Low</a>
+                    <a href="{% url 'detailspage' page=1 order='name-asc' %}" class="dropdown-item">Name - Ascending</a>
+                    <a href="{% url 'detailspage' page=1 order='name-desc' %}" class="dropdown-item">Name - Descending</a>
+                </div>
             </div>
         </div>
         
@@ -106,7 +106,7 @@
         <nav>
             <ul class="pagination justify-content-center">
                 <li class="page-item">
-                    <a href="{% url 'detailspage' curr_page|add:'-1' %}" class="page-link" aria-label='Previous'>
+                    <a href="{% url 'detailspage' page=curr_page|add:'-1' order=order %}" class="page-link" aria-label='Previous'>
                         <span aria-hidden='true'>&laquo;</span>
                         <span class="sr-only">Previous</span>
                     </a>
@@ -120,13 +120,13 @@
                             </span>
                     {% else %}
                         <li class="page-item">
-                            <a href="{% url 'detailspage' page %}" class="page-link">{{ page }}</a>
+                            <a href="{% url 'detailspage' page=page order=order%}" class="page-link">{{ page }}</a>
                     {% endif %}
                             
                         </li>
                 {% endfor %}
                 <li class="page-item">
-                    <a href="{% url 'detailspage' curr_page|add:'1' %}" class="page-link" aria-label='Next'>
+                    <a href="{% url 'detailspage' page=curr_page|add:'1' order=order %}" class="page-link" aria-label='Next'>
                         <span aria-hidden='true'>&raquo;</span>
                         <span class="sr-only">Next</span>
                     </a>

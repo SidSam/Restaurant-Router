@@ -24,7 +24,7 @@ class FrontView(View):
 def front(request):
 	return render(request, 'routeyourfood/front.html')
 
-def details(request, page):
+def details(request, page, order):
 	pids = request.session['place_ids']
 	page = int(page)
 
@@ -34,10 +34,21 @@ def details(request, page):
 
 	curr_pids = pids[start:stop+1]
 
-	objs = Restaurant.objects.filter(place_id__in=curr_pids)
+	if order == 'default':
+		objs = Restaurant.objects.filter(place_id__in=curr_pids)
+	elif order == 'rating-asc':
+		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('rating')
+	elif order == 'rating-desc':
+		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('-rating')
+	elif order == 'name-asc':
+		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('name')
+	elif order == 'name-desc':
+		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('-name')
+
 	print total_pages
 	print pids
-	return render(request, 'routeyourfood/details.html', {'objs': objs, 'total_pages': total_pages, 'total_pages_gen': xrange(1, total_pages+1), 'curr_page': page})
+	json_context = {'objs': objs, 'total_pages': total_pages, 'total_pages_gen': xrange(1, total_pages+1), 'curr_page': page, 'order': order}
+	return render(request, 'routeyourfood/details.html', json_context)
 
 def get_details(request):
 	if request.is_ajax():
