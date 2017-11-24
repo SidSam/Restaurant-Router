@@ -309,9 +309,15 @@ function script() {
 
 	}
 
-	var pageNo = +document.getElementById('page-no').innerHTML;
+	var pageNo = +document.getElementById('curr-page').innerHTML;
 	
 	// newPopulatePage(pageNo);
+
+	if (pageNo == 1) {
+		document.querySelector('[aria-label="Previous"]').href = '';
+	}
+	// else if (pageNo )
+
 
     document.getElementById('rating-asc').addEventListener("click", function() {
     	au.sort(sortByField('rating'));

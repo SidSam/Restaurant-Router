@@ -35,8 +35,9 @@ def details(request, page):
 	curr_pids = pids[start:stop+1]
 
 	objs = Restaurant.objects.filter(place_id__in=curr_pids)
-
-	return render(request, 'routeyourfood/details.html', {'objs': objs})
+	print total_pages
+	print pids
+	return render(request, 'routeyourfood/details.html', {'objs': objs, 'total_pages': total_pages, 'total_pages_gen': xrange(1, total_pages+1), 'curr_page': page})
 
 def get_details(request):
 	if request.is_ajax():
