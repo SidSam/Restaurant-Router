@@ -11,6 +11,7 @@ import simplejson as json
 from decimal import *
 from django.core import serializers
 import traceback, sys
+from haversine import haversine
 from django.forms.models import model_to_dict
 
 # Create your views here.
@@ -44,6 +45,10 @@ def details(request, page, order):
 		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('name')
 	elif order == 'name-desc':
 		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('-name')
+	elif order == 'distance-asc':
+		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('distance_from_route')
+	elif order == 'distance-desc':
+		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('-distance_from_route')
 
 	print total_pages
 	print pids
@@ -80,7 +85,7 @@ def process(request):
 		
 		# for coord in coords:
 		print "coord is ", coord
-		lat, lng = coord[0], coord[1]
+		lat, lng = float(coord[0]), float(coord[1])
 		query_result = google_places.radar_search(lat_lng={'lat': lat, 'lng': lng} , radius=distance, types=[types.TYPE_RESTAURANT])
 		restaurants_from_db = []
 		new_restaurants = []
@@ -115,19 +120,24 @@ def process(request):
 						break
 					photo.get(maxheight=1600)
 					photo_urls.append(photo.url)
+
+				distance_from_route = haversine((float(place.geo_location['lat']), float(place.geo_location['lng'])), (lat, lng))
+				print place.name
+				print distance_from_route
 				
-				# new_restaurant = Restaurant(place_id=place.place_id,
-				# 							name=place.name,
-				# 							address=place.formatted_address,
-				# 							phone=place.local_phone_number,
-				# 							rating=place.rating,
-				# 							website=place.website,
-				# 							maps_url=place.url,
-				# 							photos=photo_urls,
-				# 							lat=place.geo_location['lat'],
-				# 							lng=place.geo_location['lng'])
-				# new_restaurant.save()
-			# 	break
+				new_restaurant = Restaurant(place_id=place.place_id,
+											name=place.name,
+											address=place.formatted_address,
+											phone=place.local_phone_number,
+											rating=place.rating,
+											website=place.website,
+											maps_url=place.url,
+											photos=photo_urls,
+											lat=place.geo_location['lat'],
+											lng=place.geo_location['lng'],
+											distance_from_route=distance_from_route)
+				new_restaurant.save()
+				# break
 		# return HttpResponse(json.dumps(curr_restaurants, cls=DjangoJSONEncoder))
 		# return HttpResponse(pickle.dumps(curr_restaurants))
 		# return HttpResponse(serializers.serialize("json", curr_restaurants))

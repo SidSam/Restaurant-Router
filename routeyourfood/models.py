@@ -17,6 +17,7 @@ class Restaurant(models.Model):
 	photos = ArrayField(models.URLField())
 	lat = models.DecimalField(max_digits=9, decimal_places=6)
 	lng = models.DecimalField(max_digits=9, decimal_places=6)
+	distance_from_route = models.FloatField(default=None)
 
 	def __str__(self):
 		return "%s --- %s" % (self.place_id, self.name)
