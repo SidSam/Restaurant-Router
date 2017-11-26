@@ -33,25 +33,22 @@ def details(request, page, order):
 	start = (page-1)*4
 	stop = page*4-1 if len(pids) > 3 else len(pids)
 
-	curr_pids = pids[start:stop+1]
+	ordering_dict = {
+		'rating-asc': 'rating',
+		'rating-desc': '-rating',
+		'name-asc': 'name',
+		'name-desc': '-name',
+		'distance-asc': 'distance_from_route',
+		'distance-desc': '-distance_from_route'
+	}
 
 	if order == 'default':
-		objs = Restaurant.objects.filter(place_id__in=curr_pids)
-	elif order == 'rating-asc':
-		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('rating')
-	elif order == 'rating-desc':
-		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('-rating')
-	elif order == 'name-asc':
-		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('name')
-	elif order == 'name-desc':
-		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('-name')
-	elif order == 'distance-asc':
-		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('distance_from_route')
-	elif order == 'distance-desc':
-		objs = Restaurant.objects.filter(place_id__in=curr_pids).order_by('-distance_from_route')
+		objs = Restaurant.objects.filter(place_id__in=pids)[start:stop+1]
+	else:
+		objs = Restaurant.objects.order_by(ordering_dict[order]).filter(place_id__in=pids)[start:stop+1]
 
-	print total_pages
-	print pids
+	print objs
+
 	json_context = {'objs': objs, 'total_pages': total_pages, 'total_pages_gen': xrange(1, total_pages+1), 'curr_page': page, 'order': order}
 	return render(request, 'routeyourfood/details.html', json_context)
 
