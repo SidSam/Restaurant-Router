@@ -8,7 +8,6 @@ env:
 # command to install dependencies
 install:
     - pip install -r requirements.txt
-    - pip install psycopg2 --quiet
 before_script:
     - psql -c 'create database travis_ci_test;' -U postgres
 # command to run tests
