@@ -45,7 +45,7 @@ def details(request, page, order):
 	if order == 'default':
 		objs = Restaurant.objects.filter(place_id__in=pids)[start:stop+1]
 	else:
-		objs = Restaurant.objects.order_by(ordering_dict[order]).filter(place_id__in=pids)[start:stop+1]
+		objs = Restaurant.objects.filter(place_id__in=pids).order_by(ordering_dict[order])[start:stop+1]
 
 	print objs
 
