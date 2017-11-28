@@ -13,6 +13,7 @@ from django.core import serializers
 import traceback, sys
 from haversine import haversine
 from django.forms.models import model_to_dict
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 # Create your views here.
 
@@ -29,9 +30,9 @@ def details(request, page, order):
 	pids = request.session['place_ids']
 	page = int(page)
 
-	total_pages = len(pids)/4 + 1
-	start = (page-1)*4
-	stop = page*4-1 if len(pids) > 3 else len(pids)
+	# total_pages = len(pids)/4 + 1
+	# start = (page-1)*4
+	# stop = page*4-1 if len(pids) > 3 else len(pids)
 
 	ordering_dict = {
 		'rating-asc': 'rating',
@@ -43,13 +44,20 @@ def details(request, page, order):
 	}
 
 	if order == 'default':
-		objs = Restaurant.objects.filter(place_id__in=pids)[start:stop+1]
+		obj_list = Restaurant.objects.filter(place_id__in=pids)
 	else:
-		objs = Restaurant.objects.filter(place_id__in=pids).order_by(ordering_dict[order])[start:stop+1]
+		obj_list = Restaurant.objects.filter(place_id__in=pids).order_by(ordering_dict[order])
 
-	print objs
+	paginator = Paginator(obj_list, 4, allow_empty_first_page=False)
 
-	json_context = {'objs': objs, 'total_pages': total_pages, 'total_pages_gen': xrange(1, total_pages+1), 'curr_page': page, 'order': order}
+	try:
+		objs = paginator.page(page)
+	except PageNotAnInteger:
+		objs = paginator.page(1)
+	except EmptyPage:
+		objs = paginator.page(paginator.num_pages)
+
+	json_context = {'objs': objs, 'total_pages_gen': paginator.page_range, 'order': order}
 	return render(request, 'routeyourfood/details.html', json_context)
 
 def get_details(request):
