@@ -55,7 +55,7 @@
         
         <div class="container" id='main'>
 
-            {% for obj in objs %}
+            {% for restaurant in restaurants %}
 
                 {% if forloop.counter0|divisibleby:"2" %}
                     <div class="row">
@@ -63,18 +63,18 @@
 
                         <div class="col-md-6" style='border: 1px red solid; max-height: 300px; overflow-y: auto'>
                             <div class="row">
-                                {{ obj.name }}
+                                {{ restaurant.name }}
                             </div>
                             <div class="row">
-                                {{ obj.address }}
+                                {{ restaurant.address }}
                             </div>
                             <div class="row">
-                                {{ obj.phone }}
+                                {{ restaurant.phone }}
                             </div>
                             <div class="row" style='height: 150px; width: 100%'>
                                 <div class='carousel slide' data-interval='false' id='carousel-{{forloop.counter0}}'>
                                     <div class="carousel-inner" role='listbox'>
-                                        {% for photo in obj.photos %}
+                                        {% for photo in restaurant.photos %}
                                             {% if forloop.counter == 1 %}
                                                 <div class="carousel-item active">
                                             {% else %}
@@ -95,13 +95,13 @@
                                 </div>
                             </div>
                             <div class="row">
-                                {{ obj.rating }}
+                                {{ restaurant.rating }}
                             </div>
                             <div class="row">
-                                <a href="{{ obj.website }}" target='_blank'>Website</a>
+                                <a href="{{ restaurant.website }}" target='_blank'>Website</a>
                             </div>
                             <div class="row">
-                                <a href="{{ obj.maps_url }}" target='_blank'>Go to location on Google Maps</a>
+                                <a href="{{ restaurant.maps_url }}" target='_blank'>Go to location on Google Maps</a>
                             </div>
                         </div>     
 
@@ -114,10 +114,11 @@
         </div>
         
         <nav>
+            {% if is_paginated %}
             <ul class="pagination justify-content-center">
-                {% if objs.has_previous %}
+                {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a href="{% url 'detailspage' page=objs.previous_page_number order=order %}" class="page-link" aria-label='Previous'>
+                        <a href="{% url 'detailspage' page=page_obj.previous_page_number order=order %}" class="page-link" aria-label='Previous'>
                 {% else %}
                     <li class="page-item disabled">
                         <a class="page-link" aria-label='Previous' tabindex="-1">
@@ -127,8 +128,8 @@
                         </a>
                     </li>
                 
-                {% for page in total_pages_gen %}
-                    {% if page == objs.number %}
+                {% for page in paginator.page_range %}
+                    {% if page == page_obj.number %}
                         <li class="page-item active">
                             <span class="page-link">
                                 {{ page }}
@@ -142,9 +143,9 @@
                         </li>
                 {% endfor %}
                 
-                {% if objs.has_next %}
+                {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a href="{% url 'detailspage' page=objs.next_page_number order=order %}" class="page-link" aria-label='Next'>
+                        <a href="{% url 'detailspage' page=page_obj.next_page_number order=order %}" class="page-link" aria-label='Next'>
                 {% else %}
                     <li class="page-item disabled">
                         <a class="page-link" aria-label='Next' tabindex="-1">
@@ -154,6 +155,7 @@
                         </a>
                 </li>
             </ul> 
+            {%endif %}
         </nav>
 
     </body>

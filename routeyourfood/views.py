@@ -2,8 +2,8 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render
-from django.views import View
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.views import generic
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from googleplaces import GooglePlaces, types, lang
 from models import Restaurant
 from django.core.exceptions import ObjectDoesNotExist
@@ -14,17 +14,54 @@ import traceback, sys
 from haversine import haversine
 from django.forms.models import model_to_dict
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.views.decorators.http import require_POST, require_GET
+from django.utils.decorators import method_decorator
 
 # Create your views here.
 
 KEY = 'AIzaSyDIeaoqxd3NoRAEgDlUOjN6QCulaw7N4aA'
 
-class FrontView(View):
-	def get(self, request):
-		return HttpResponse('front')
+# class FrontView(View):
+# 	def get(self, request):
+# 		return HttpResponse('front')
 
-def front(request):
-	return render(request, 'routeyourfood/front.html')
+# def front(request):
+# 	return render(request, 'routeyourfood/front.html')
+
+class FrontView(generic.TemplateView):
+	template_name = 'routeyourfood/front.html'
+
+class RestaurantListView(generic.ListView):
+	model = Restaurant
+	context_object_name = 'restaurants'
+	template_name = 'routeyourfood/details.html'
+	paginate_by = 4
+
+	@method_decorator(require_GET)
+	def dispatch(self, request, *args, **kwargs):
+		return super(RestaurantListView, self).dispatch(request, *args, **kwargs)
+
+	def get_queryset(self, **kwargs):
+		self.pids = self.request.session['place_ids']
+		self.order = self.kwargs['order']
+		
+		self.ordering_dict = {
+			'rating-asc': 'rating',
+			'rating-desc': '-rating',
+			'name-asc': 'name',
+			'name-desc': '-name',
+			'distance-asc': 'distance_from_route',
+			'distance-desc': '-distance_from_route'
+		}
+
+		if self.order == 'default':
+			return Restaurant.objects.filter(place_id__in=self.pids)
+		return Restaurant.objects.filter(place_id__in=self.pids).order_by(self.ordering_dict[self.order])
+
+	def get_context_data(self, **kwargs):
+		context = super(RestaurantListView, self).get_context_data(**kwargs)
+		context['order'] = self.kwargs['order']
+		return context
 
 def details(request, page, order):
 	pids = request.session['place_ids']
@@ -81,6 +118,7 @@ def check_exists(place):
 	except ObjectDoesNotExist:
 		return False
 
+@require_POST
 def process(request):
 	if request.is_ajax():
 		coord = request.POST.getlist('coords[]')
@@ -148,4 +186,4 @@ def process(request):
 		# return HttpResponse(serializers.serialize("json", curr_restaurants))
 		# print curr_restaurants
 		# print json.dumps(curr_restaurants)
-		return HttpResponse(json.dumps(curr_restaurants))
+		return JsonResponse(curr_restaurants, safe=False)

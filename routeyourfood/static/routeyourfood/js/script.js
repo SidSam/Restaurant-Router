@@ -452,7 +452,7 @@ function initMap() {
     function successFunction(data, textStatus, jqXHR) {
         console.log('inside success function');
         console.log(data);
-        data = JSON.parse(data);
+        // data = JSON.parse(data);
         for (var i=0;i<data.length;i++) {
             console.log(data[i]);
             restaurants.push(data[i].place_id);
