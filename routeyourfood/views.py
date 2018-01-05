@@ -16,6 +16,7 @@ from django.forms.models import model_to_dict
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.decorators.http import require_POST, require_GET
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
 
 # Create your views here.
 
@@ -29,7 +30,7 @@ KEY = 'AIzaSyDIeaoqxd3NoRAEgDlUOjN6QCulaw7N4aA'
 # 	return render(request, 'routeyourfood/front.html')
 
 class FrontView(generic.TemplateView):
-	template_name = 'routeyourfood/front.html'
+	template_name = 'routeyourfood/index.html'
 
 class RestaurantListView(generic.ListView):
 	model = Restaurant
@@ -119,38 +120,43 @@ def check_exists(place):
 		return False
 
 @require_POST
+@csrf_protect
 def process(request):
 	if request.is_ajax():
-		coord = request.POST.getlist('coords[]')
+		print request.POST
+		lat, lng = request.POST['lat'], request.POST['lng']
 		distance = request.POST['distance']
 		google_places = GooglePlaces(KEY)
 		request.session['place_ids'] = []
-		
+		print "lat and lng are %s and %s" %(lat, lng)
+		print "distance is %s" % distance
+
 		# for coord in coords:
-		print "coord is ", coord
-		lat, lng = float(coord[0]), float(coord[1])
 		query_result = google_places.radar_search(lat_lng={'lat': lat, 'lng': lng} , radius=distance, types=[types.TYPE_RESTAURANT])
 		restaurants_from_db = []
 		new_restaurants = []
 		curr_restaurants = []
 
 		for place in query_result.places:
-			print "place is ", place.place_id
+			# print 
+			# print "place is ", place.place_id
 			# check if place already exists in database
 			if check_exists(place):
-				print "already existing in db, so continuing"
+				# print "already existing in db, so continuing"
 				obj = Restaurant.objects.get(place_id=place.place_id)
 				curr_restaurants.append({'place_id': obj.place_id, 'name': obj.name, 'lat': Decimal(json.dumps(obj.lat, use_decimal=True)), 'lng': Decimal(json.dumps(obj.lng, use_decimal=True))})
 				temp = request.session['place_ids']
 				temp.append(obj.place_id)
 				request.session['place_ids'] = temp
 				continue
-			
+				
 			place.get_details()
-			
+			# print place.name 
+				
 			if check_authentic(place):
-			# 	print "place was also authentic"
-			# 	print place.formatted_address
+				print "place was also authentic"
+				
+				exit()
 				curr_restaurants.append({'place_id': place.place_id, 'name': place.name, 'lat': Decimal(place.geo_location['lat']), 'lng': Decimal(place.geo_location['lng'])})
 				temp = request.session['place_ids']
 				temp.append(place.place_id)
@@ -167,7 +173,7 @@ def process(request):
 				distance_from_route = haversine((float(place.geo_location['lat']), float(place.geo_location['lng'])), (lat, lng))
 				print place.name
 				print distance_from_route
-				
+					
 				new_restaurant = Restaurant(place_id=place.place_id,
 											name=place.name,
 											address=place.formatted_address,
@@ -181,9 +187,4 @@ def process(request):
 											distance_from_route=distance_from_route)
 				new_restaurant.save()
 				# break
-		# return HttpResponse(json.dumps(curr_restaurants, cls=DjangoJSONEncoder))
-		# return HttpResponse(pickle.dumps(curr_restaurants))
-		# return HttpResponse(serializers.serialize("json", curr_restaurants))
-		# print curr_restaurants
-		# print json.dumps(curr_restaurants)
-		return JsonResponse(curr_restaurants, safe=False)
+	return JsonResponse(curr_restaurants, safe=False)

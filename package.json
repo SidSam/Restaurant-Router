@@ -1,0 +1,33 @@
+{
+  "name": "restaurantrouter",
+  "version": "1.0.0",
+  "description": "App to show restaurants at a specific distance along route",
+  "private": true,
+  "main": "index.jsx",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SidSam/Restaurant-Router.git"
+  },
+  "author": "Sidharth Samant",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SidSam/Restaurant-Router/issues"
+  },
+  "homepage": "https://github.com/SidSam/Restaurant-Router#readme",
+  "dependencies": {
+    "axios": "^0.17.1",
+    "babel": "^6.23.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "qs": "^6.5.1",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "webpack": "^3.10.0",
+    "webpack-bundle-tracker": "^0.2.0"
+  }
+}
