@@ -3,3 +3,4 @@ psycopg2
 python-google-places
 simplejson
 haversine
+django-webpack-loader
