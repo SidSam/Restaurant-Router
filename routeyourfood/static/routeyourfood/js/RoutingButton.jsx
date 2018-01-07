@@ -18,12 +18,7 @@ export default class DistanceInputFieldButton extends React.Component {
 
 	getPlaceFromMainWrapper(position) {
         return this.props.onRoutePress(position);
-        // return this.props.sourceCallback();
     }
-
-    // getDestinationFromMainWrapper() {
-    // 	return this.props.destinationCallback();
-    // }
 
 	handleChange(e) {
 		this.setState({
@@ -41,7 +36,7 @@ export default class DistanceInputFieldButton extends React.Component {
 		console.log(destination);
 
 		let map_directions = new google.maps.Map(document.getElementById('directions-map'), {
-			center: {lat: 17.3850, lng: 78.4867},
+			center: {lat: parseFloat(sessionStorage.getItem('lat')), lng: parseFloat(sessionStorage.getItem('lng'))},
 			zoom: 13
 		});
 		

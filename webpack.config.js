@@ -6,6 +6,7 @@ module.exports = {
   context: __dirname,
 
   entry: {
+    landingPage: './routeyourfood/static/routeyourfood/js/landingpage',
     indexPage: './routeyourfood/static/routeyourfood/js/index'
   }, 
 

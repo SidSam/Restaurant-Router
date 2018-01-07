@@ -63,7 +63,7 @@ export default class GoogleMap extends React.Component {
 
 	componentDidMount() {
 		let map = new google.maps.Map(document.getElementById('map-'+this.props.position), {
-			center: {lat: 17.3850, lng: 78.4867},
+			center: {lat: parseFloat(sessionStorage.getItem('lat')), lng: parseFloat(sessionStorage.getItem('lng'))},
 			zoom: 13
 		});	
 		

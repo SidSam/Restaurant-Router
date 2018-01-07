@@ -29,6 +29,9 @@ KEY = 'AIzaSyDIeaoqxd3NoRAEgDlUOjN6QCulaw7N4aA'
 # def front(request):
 # 	return render(request, 'routeyourfood/front.html')
 
+class LandingView(generic.TemplateView):
+	template_name = 'routeyourfood/landingpage.html'
+
 class FrontView(generic.TemplateView):
 	template_name = 'routeyourfood/index.html'
 
