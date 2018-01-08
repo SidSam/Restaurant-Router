@@ -47,7 +47,7 @@ export default class DistanceInputFieldButton extends React.Component {
         let rendererOptions = {draggable: true};
         directionsDisplay.setMap(map_directions);
         //directionsDisplay.setOptions(rendererOptions);
-        directionsDisplay.setPanel(document.getElementById('panel'));
+        // directionsDisplay.setPanel(document.getElementById('panel'));
         
         let request = {
             origin: source,
@@ -103,9 +103,7 @@ export default class DistanceInputFieldButton extends React.Component {
                 
                 console.log(polyline_coordinates);
                 
-                for (let i=0; i<1; i++) {
-                    console.log(i);
-
+                for (let i=0; i<polyline_coordinates.length; i++) {
                     axios({
 				        method: 'post',
 				        url: 'process/',

@@ -96,10 +96,18 @@
                                 </div>
                             </div>
                             <div class="row">
-                                {{ restaurant.rating }}
+                                {% if restaurant.rating %}
+                                    {{ restaurant.rating }}
+                                {% else %}
+                                    <i>No rating available on Google Maps</i>
+                                {% endif %}
                             </div>
                             <div class="row">
-                                <a href="{{ restaurant.website }}" target='_blank'>Website</a>
+                                {% if restaurant.website %}
+                                    <a href="{{ restaurant.website }}" target='_blank'>Website</a>
+                                {% else %}
+                                    <i>No official website available</i>
+                                {% endif %}
                             </div>
                             <div class="row">
                                 <a href="{{ restaurant.maps_url }}" target='_blank'>Go to location on Google Maps</a>

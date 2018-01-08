@@ -17,20 +17,21 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.decorators.http import require_POST, require_GET
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
+from django.views import View
+import pickle
 
 # Create your views here.
 
 KEY = 'AIzaSyDIeaoqxd3NoRAEgDlUOjN6QCulaw7N4aA'
 
-# class FrontView(View):
-# 	def get(self, request):
-# 		return HttpResponse('front')
+class LandingView(View):
+	@method_decorator(require_GET)
+	def dispatch(self, request, *args, **kwargs):
+		return super(LandingView, self).dispatch(request, *args, **kwargs)
 
-# def front(request):
-# 	return render(request, 'routeyourfood/front.html')
-
-class LandingView(generic.TemplateView):
-	template_name = 'routeyourfood/landingpage.html'
+	def get(self, request, *args, **kwargs):
+		request.session['place_ids'] = pickle.dumps(set())
+		return render(request, 'routeyourfood/landingpage.html')
 
 class FrontView(generic.TemplateView):
 	template_name = 'routeyourfood/index.html'
@@ -46,7 +47,7 @@ class RestaurantListView(generic.ListView):
 		return super(RestaurantListView, self).dispatch(request, *args, **kwargs)
 
 	def get_queryset(self, **kwargs):
-		self.pids = self.request.session['place_ids']
+		self.pids = pickle.loads(self.request.session['place_ids'])
 		self.order = self.kwargs['order']
 		
 		self.ordering_dict = {
@@ -57,7 +58,7 @@ class RestaurantListView(generic.ListView):
 			'distance-asc': 'distance_from_route',
 			'distance-desc': '-distance_from_route'
 		}
-
+		
 		if self.order == 'default':
 			return Restaurant.objects.filter(place_id__in=self.pids)
 		return Restaurant.objects.filter(place_id__in=self.pids).order_by(self.ordering_dict[self.order])
@@ -70,10 +71,6 @@ class RestaurantListView(generic.ListView):
 def details(request, page, order):
 	pids = request.session['place_ids']
 	page = int(page)
-
-	# total_pages = len(pids)/4 + 1
-	# start = (page-1)*4
-	# stop = page*4-1 if len(pids) > 3 else len(pids)
 
 	ordering_dict = {
 		'rating-asc': 'rating',
@@ -130,7 +127,6 @@ def process(request):
 		lat, lng = request.POST['lat'], request.POST['lng']
 		distance = request.POST['distance']
 		google_places = GooglePlaces(KEY)
-		request.session['place_ids'] = []
 		print "lat and lng are %s and %s" %(lat, lng)
 		print "distance is %s" % distance
 
@@ -141,16 +137,18 @@ def process(request):
 		curr_restaurants = []
 
 		for place in query_result.places:
-			# print 
-			# print "place is ", place.place_id
+			print 
+			print "place is ", place.place_id
 			# check if place already exists in database
 			if check_exists(place):
-				# print "already existing in db, so continuing"
+				print "already existing in db, so continuing"
 				obj = Restaurant.objects.get(place_id=place.place_id)
 				curr_restaurants.append({'place_id': obj.place_id, 'name': obj.name, 'lat': Decimal(json.dumps(obj.lat, use_decimal=True)), 'lng': Decimal(json.dumps(obj.lng, use_decimal=True))})
-				temp = request.session['place_ids']
-				temp.append(obj.place_id)
-				request.session['place_ids'] = temp
+				temp = pickle.loads(request.session['place_ids'])
+				temp.add(obj.place_id)
+				request.session['place_ids'] = pickle.dumps(temp)
+				# request.session['place_ids'].add(obj.place_id)
+				print "another place id added, now session place ids are %s" % request.session['place_ids']
 				continue
 				
 			place.get_details()
@@ -159,11 +157,12 @@ def process(request):
 			if check_authentic(place):
 				print "place was also authentic"
 				
-				exit()
 				curr_restaurants.append({'place_id': place.place_id, 'name': place.name, 'lat': Decimal(place.geo_location['lat']), 'lng': Decimal(place.geo_location['lng'])})
-				temp = request.session['place_ids']
-				temp.append(place.place_id)
-				request.session['place_ids'] = temp
+				temp = pickle.loads(request.session['place_ids'])
+				temp.add(place.place_id)
+				request.session['place_ids'] = pickle.dumps(temp)
+				# request.session['place_ids'].add(place.place_id)
+				print "another place id added, now session place ids are %s" % request.session['place_ids']
 
 			# 	# get only 3 photos
 				photo_urls = []
@@ -173,7 +172,7 @@ def process(request):
 					photo.get(maxheight=1600)
 					photo_urls.append(photo.url)
 
-				distance_from_route = haversine((float(place.geo_location['lat']), float(place.geo_location['lng'])), (lat, lng))
+				distance_from_route = haversine((float(place.geo_location['lat']), float(place.geo_location['lng'])), (float(lat), float(lng)))
 				print place.name
 				print distance_from_route
 					
@@ -190,4 +189,5 @@ def process(request):
 											distance_from_route=distance_from_route)
 				new_restaurant.save()
 				# break
-	return JsonResponse(curr_restaurants, safe=False)
+		print request.session['place_ids']	
+		return JsonResponse(curr_restaurants, safe=False)	

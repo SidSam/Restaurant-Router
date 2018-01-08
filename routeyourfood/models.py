@@ -7,8 +7,8 @@ from django.contrib.postgres.fields import ArrayField
 # Create your models here.
 
 class Restaurant(models.Model):
-	place_id = models.CharField(max_length=50)
-	name = models.CharField(max_length=20)
+	place_id = models.CharField(max_length=50, unique=True)
+	name = models.CharField(max_length=80)
 	address = models.CharField(max_length=500)
 	phone = models.CharField(max_length=20)
 	rating = models.FloatField(null=True)

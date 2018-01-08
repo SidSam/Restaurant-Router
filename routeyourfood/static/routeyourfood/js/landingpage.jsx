@@ -88,6 +88,7 @@ class LocationBar extends React.Component {
 			alert('Unable to retrieve your location. Default coordinates pertaining to Hyderabad will be used.');
 			sessionStorage.setItem('lat', 17.3850);
 			sessionStorage.setItem('lng', 78.4867);
+			window.location.href = 'front/';
 		}
 
 		navigator.geolocation.getCurrentPosition(success, error);
