@@ -30,10 +30,9 @@ export default class DistanceInputFieldButton extends React.Component {
 		let source = this.getPlaceFromMainWrapper('source');
 		let destination = this.getPlaceFromMainWrapper('destination');
 		let distance = this.state.distance;
-		console.log(distance);
 
-		console.log(source);
-		console.log(destination);
+        document.getElementById('directions-map-row').style.display = 'block';
+        document.getElementById('loader').style.display = 'block';
 
 		let map_directions = new google.maps.Map(document.getElementById('directions-map'), {
 			center: {lat: parseFloat(sessionStorage.getItem('lat')), lng: parseFloat(sessionStorage.getItem('lng'))},
@@ -83,6 +82,7 @@ export default class DistanceInputFieldButton extends React.Component {
                     infowindowContent_directions.children['place-icon'].src = result.icon;
                     infowindowContent_directions.children['place-name'].textContent = result.name;
                     infowindowContent_directions.children['place-address'].textContent = result.formatted_address;
+                    infowindowContent_directions.children['place-icon'].style.display = 'inline';
                     infoWindow_directions.open(map_directions, marker);
                 });
             });
@@ -101,21 +101,31 @@ export default class DistanceInputFieldButton extends React.Component {
                     polyline_coordinates.push([coord.lat(), coord.lng()]);
                 }
                 
-                console.log(polyline_coordinates);
+                let promises = [];
                 
                 for (let i=0; i<polyline_coordinates.length; i++) {
-                    axios({
-				        method: 'post',
-				        url: 'process/',
-				        data: qs.stringify({
-				            lat: polyline_coordinates[i][0],
-				            lng: polyline_coordinates[i][1],
-				            distance: distance
-				        }),
-				        headers: {'X-Requested-With': 'XMLHttpRequest',
-				                  'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-				    }).then(successResponseFunction);
+                    promises.push(axios({
+                            method: 'post',
+                            url: 'process/',
+                            data: qs.stringify({
+                                lat: polyline_coordinates[i][0],
+                                lng: polyline_coordinates[i][1],
+                                distance: distance
+                            }),
+                            headers: {'X-Requested-With': 'XMLHttpRequest',
+                                      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                        }).then(successResponseFunction)
+                    );   
                 }
+
+                axios.all(promises)
+                    .then(axios.spread((acct, perms) => {
+                        // all axios requests are complete
+                        document.getElementById('loader').style.display = 'none';
+                        document.getElementById('loading-text').style.display = 'none';
+                        document.getElementById('footer').style.display = 'block';
+
+                    }));
                 
             }
             else {
@@ -127,9 +137,29 @@ export default class DistanceInputFieldButton extends React.Component {
 
 	render() {
 		return (
-			<div>
-				<input type='text' placeholder='Enter radius (in meters) from route' onChange={(e) => this.handleChange(e)} />
-				<button onClick={this.handleClick}>Show route</button>
+			<div style={{textAlign: 'center'}}>
+                <input style={{width: '25%'}} className='button-input' type='text' placeholder='Enter distance (in meters) from route' onChange={(e) => this.handleChange(e)} />
+                <button className='button-input btn btn-primary' onClick={this.handleClick}>Show route</button>
+                <div id='loader' style={{paddingLeft: '45%'}}>
+                    <div className="lds-ellipsis">
+                        <div>
+                            <div></div>
+                        </div>
+                        <div>
+                            <div></div>
+                        </div>
+                        <div>
+                            <div></div>
+                        </div>
+                        <div>
+                            <div></div>
+                        </div>
+                        <div>
+                            <div></div>
+                        </div>
+                    </div>
+                    <p style={{marginTop: '-5%', marginLeft: '-65%'}} id='loading-text'>Loading ... </p>
+                </div>
 			</div>
 		)
 	}

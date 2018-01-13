@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load render_bundle from webpack_loader %}
+{% load static %}
 
 <html>
 <head>
@@ -9,6 +10,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIeaoqxd3NoRAEgDlUOjN6QCulaw7N4aA&libraries=places"></script>
+	<link rel="stylesheet" type="text/css" href="{% static 'routeyourfood/css/style.css' %}">
 </head>
 <body>
 	<div id='location-bar'></div>

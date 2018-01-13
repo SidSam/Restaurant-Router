@@ -6,41 +6,17 @@
     	<title>JS Travel Points</title>
     	<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
         <meta charset="utf-8">
-        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
-        <link rel="stylesheet" type="text/css" href="{% static 'routeyourfood/css/style.css' %}">
-        <!-- <script type="text/javascript" src="{% static 'routeyourfood/js/jquery-1.9.0.js' %}"></script> -->
-        <!-- <script type="text/javascript" src="{% static 'routeyourfood/js/detailsscript.js' %}" async defer></script> -->
-        <!-- <script type="text/javascript">
-
-            function script() {
-
-                let pageNo = "{{ objs.number }}";
-                let totalPages = "{{ objs.paginator.num_pages }}";
-
-                if (pageNo == 1) {
-                    let prevAnchor = document.querySelector('[aria-label="Previous"]'); 
-                    prevAnchor.parentNode.className += ' disabled';
-                    prevAnchor.setAttribute('tabindex', -1);
-                }
-                else if (pageNo == totalPages) {
-                    let nextAnchor = document.querySelector('[aria-label="Next"]');
-                    nextAnchor.parentNode.className += ' disabled';
-                    nextAnchor.setAttribute('tabindex', -1);
-                }
-
-            }
-            
-        </script> -->
-        
+        <link rel="stylesheet" type="text/css" href="{% static 'routeyourfood/css/style.css' %}">        
     </head>
     <body>
 
         <span id='curr-page' hidden>{{ curr_page }}</span>
 
-        <div class="container dropdown">
+        <div class="container dropdown" style="margin-top: 2%">
             <div class="row">
                 <button class="btn btn-secondary btn-sm dropdown-toggle dropdown-toggle-split" type='button' id='dropdownMenuButton' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Sort:</button>
                 <div class="dropdown-menu" aria-labelledby='dropdownMenuButton'>
@@ -54,23 +30,23 @@
             </div>
         </div>
         
-        <div class="container" id='main'>
+        <div class="container" id='main' style="margin-top: 2%">
 
             {% for restaurant in restaurants %}
 
                 {% if forloop.counter0|divisibleby:"2" %}
-                    <div class="row">
+                    <div class="row detailsrow">
                 {% endif %}
 
-                        <div class="col-md-6" style='border: 1px red solid; max-height: 300px; overflow-y: auto'>
-                            <div class="row">
-                                {{ restaurant.name }}
+                        <div class="col-md-5 grid-box well">
+                            <div class="row name-row">
+                                <p>{{ restaurant.name }}</p>
                             </div>
-                            <div class="row">
-                                {{ restaurant.address }}
+                            <div class="row address-row">
+                                <p><b>Address</b> - {{ restaurant.address }}</p>
                             </div>
-                            <div class="row">
-                                {{ restaurant.phone }}
+                            <div class="row phone-row">
+                                <p><b>Phone</b> - {{ restaurant.phone }}</p>
                             </div>
                             <div class="row" style='height: 150px; width: 100%'>
                                 <div class='carousel slide' data-interval='false' id='carousel-{{forloop.counter0}}'>
@@ -95,24 +71,30 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <div class="row rating-row">
                                 {% if restaurant.rating %}
-                                    {{ restaurant.rating }}
+                                    <p><b>Rating</b> - {{ restaurant.rating }}</p>
                                 {% else %}
-                                    <i>No rating available on Google Maps</i>
+                                    <p><i>No rating available on Google Maps</i></p>
                                 {% endif %}
                             </div>
-                            <div class="row">
-                                {% if restaurant.website %}
-                                    <a href="{{ restaurant.website }}" target='_blank'>Website</a>
-                                {% else %}
-                                    <i>No official website available</i>
-                                {% endif %}
+                            <div class="row website-map-row">
+                                <div class="col-md-6">
+                                    {% if restaurant.website %}
+                                        <p><a href="{{ restaurant.website }}" target='_blank'>Official Website</a></p>
+                                    {% else %}
+                                        <p><i>No official website available</i></p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <p><a class='pull-right' href="{{ restaurant.maps_url }}" target='_blank'>Go to location on Google Maps</a></p>
+                                </div>
                             </div>
-                            <div class="row">
-                                <a href="{{ restaurant.maps_url }}" target='_blank'>Go to location on Google Maps</a>
-                            </div>
-                        </div>     
+                        </div>  
+
+                    {% if forloop.counter0|divisibleby:"2" %}
+                        <div class="col-md-2"></div>
+                    {% endif %}   
 
                 {% if not forloop.counter0|divisibleby:"2" %}
                     </div>
@@ -124,46 +106,46 @@
         
         <nav>
             {% if is_paginated %}
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a href="{% url 'detailspage' page=page_obj.previous_page_number order=order %}" class="page-link" aria-label='Previous'>
-                {% else %}
-                    <li class="page-item disabled">
-                        <a class="page-link" aria-label='Previous' tabindex="-1">
-                {% endif %}
-                            <span aria-hidden='true'>&laquo;</span>
-                            <span class="sr-only">Previous</span>
-                        </a>
-                    </li>
-                
-                {% for page in paginator.page_range %}
-                    {% if page == page_obj.number %}
-                        <li class="page-item active">
-                            <span class="page-link">
-                                {{ page }}
-                                <span class="sr-only">(current)</span>
-                            </span>
-                    {% else %}
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
                         <li class="page-item">
-                            <a href="{% url 'detailspage' page=page order=order%}" class="page-link">{{ page }}</a>
+                            <a href="{% url 'detailspage' page=page_obj.previous_page_number order=order %}" class="page-link" aria-label='Previous'>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" aria-label='Previous' tabindex="-1">
                     {% endif %}
-                            
+                                <span aria-hidden='true'>&laquo;</span>
+                                <span class="sr-only">Previous</span>
+                            </a>
                         </li>
-                {% endfor %}
-                
-                {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a href="{% url 'detailspage' page=page_obj.next_page_number order=order %}" class="page-link" aria-label='Next'>
-                {% else %}
-                    <li class="page-item disabled">
-                        <a class="page-link" aria-label='Next' tabindex="-1">
-                {% endif %}
-                            <span aria-hidden='true'>&raquo;</span>
-                            <span class="sr-only">Next</span>
-                        </a>
-                </li>
-            </ul> 
+                    
+                    {% for page in paginator.page_range %}
+                        {% if page == page_obj.number %}
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    {{ page }}
+                                    <span class="sr-only">(current)</span>
+                                </span>
+                        {% else %}
+                            <li class="page-item">
+                                <a href="{% url 'detailspage' page=page order=order%}" class="page-link">{{ page }}</a>
+                        {% endif %}
+                                
+                            </li>
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a href="{% url 'detailspage' page=page_obj.next_page_number order=order %}" class="page-link" aria-label='Next'>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" aria-label='Next' tabindex="-1">
+                    {% endif %}
+                                <span aria-hidden='true'>&raquo;</span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                    </li>
+                </ul> 
             {%endif %}
         </nav>
 

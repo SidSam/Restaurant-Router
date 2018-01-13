@@ -29,8 +29,16 @@ module.exports = {
         loader: 'babel-loader',
         query: {
           presets: ['react']
-        }
+        },
       }, // to transform JSX into JS
+      { 
+          test: /\.css$/, 
+          loader: 'css-loader' 
+      },
+      {
+        test: /\.(eot|svg|ttf|woff|woff2)$/,
+        loader: 'file-loader'
+      }
     ],
   },
 
